@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+python-multipart
+tesseract
+xgboost
+scikit-learn
+pandas
+numpy
+python-dotenv
+scipy
