@@ -11,11 +11,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -33,12 +31,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.coalguard.ui.components.CoalGuardLogo
+import com.example.coalguard.ui.components.StatutoryNotificationManager
 import com.example.coalguard.ui.theme.GovtBgSlate
 import com.example.coalguard.ui.theme.GovtCardBorder
 import com.example.coalguard.ui.theme.GovtGoldAmber
@@ -54,22 +52,105 @@ data class WorkerAttendanceItem(
     val workerId: String,
     val name: String,
     val designation: String,
-    val employer: String, // "CIL Regular (BCCL)" or "M/s RK Earthmovers"
+    val employer: String,
     val shift: String,
     val checkInTime: String,
-    val verificationMethod: String, // "FACE_BIOMETRIC", "GEO_FENCED_GATE", "RFID_SMART_PASS"
+    val verificationMethod: String,
     val pmeStatus: String = "FORM_O_VALID",
     var isPresent: Boolean = true,
     var photoUrl: String? = null
 )
 
-val SAMPLE_WORKERS_ROSTER = listOf(
-    WorkerAttendanceItem("1", "EMP-8821", "Er. Rajesh Kumar", "Statutory Overman", "CIL Regular (BCCL)", "Morning (06:00 - 14:00)", "06:12 AM", "FACE_BIOMETRIC"),
-    WorkerAttendanceItem("2", "EMP-8842", "Manoj Singh", "Mining Sirdar", "CIL Regular (BCCL)", "Morning (06:00 - 14:00)", "06:18 AM", "GEO_FENCED_GATE"),
-    WorkerAttendanceItem("3", "EMP-9912", "Ramesh Turi", "Heavy Dumper Operator", "M/s RK Earthmovers", "Morning (06:00 - 14:00)", "06:30 AM", "FACE_BIOMETRIC"),
-    WorkerAttendanceItem("4", "EMP-9915", "Suresh Hembram", "Underground Drill Operator", "M/s Suvidha Drilling", "Morning (06:00 - 14:00)", "06:45 AM", "RFID_SMART_PASS"),
-    WorkerAttendanceItem("5", "EMP-8850", "Sunil Marandi", "Winding Engine Operator", "CIL Regular (BCCL)", "Afternoon (14:00 - 22:00)", "Pending Shift", "GEO_FENCED_GATE", isPresent = false)
-)
+object WorkforceAttendanceManager {
+    val workerRoster = mutableStateListOf(
+        WorkerAttendanceItem("1", "EMP-8821", "Er. Rajesh Kumar", "Statutory Overman", "CIL Regular (BCCL)", "Morning (06:00 - 14:00)", "06:12 AM", "FACE_BIOMETRIC", isPresent = true),
+        WorkerAttendanceItem("2", "EMP-8842", "Manoj Singh", "Mining Sirdar", "CIL Regular (BCCL)", "Morning (06:00 - 14:00)", "06:18 AM", "GEO_FENCED_GATE", isPresent = true),
+        WorkerAttendanceItem("3", "EMP-9912", "Ramesh Turi", "Heavy Dumper Operator", "M/s RK Earthmovers", "Morning (06:00 - 14:00)", "06:30 AM", "FACE_BIOMETRIC", isPresent = true),
+        WorkerAttendanceItem("4", "EMP-9915", "Suresh Hembram", "Underground Drill Operator", "M/s Suvidha Drilling", "Morning (06:00 - 14:00)", "06:45 AM", "RFID_SMART_PASS", isPresent = true),
+        WorkerAttendanceItem("5", "EMP-8850", "Sunil Marandi", "Winding Engine Operator", "CIL Regular (BCCL)", "Afternoon (14:00 - 22:00)", "Pending Shift", "GEO_FENCED_GATE", isPresent = false)
+    )
+
+    fun onSiteCount(): Int = 352 + workerRoster.count { it.isPresent }
+
+    fun cilStaffCount(): Int = 210 + workerRoster.count { it.isPresent && it.employer.contains("CIL") }
+
+    fun contractorCount(): Int = 140 + workerRoster.count { it.isPresent && !it.employer.contains("CIL") }
+
+    fun checkInFirstUnverified(method: String = "FACE_BIOMETRIC") {
+        val idx = workerRoster.indexOfFirst { !it.isPresent }
+        if (idx != -1) {
+            val worker = workerRoster[idx]
+            workerRoster[idx] = worker.copy(
+                isPresent = true,
+                checkInTime = "Just Now",
+                verificationMethod = method
+            )
+            StatutoryNotificationManager.addNotification(
+                title = "Workforce Check-In: ${worker.name}",
+                message = "${worker.designation} ${worker.name} (${worker.employer}) checked in via $method.",
+                category = "SYSTEM",
+                severity = "INFO",
+                mineName = "Govindpur Colliery (Mine ID: 42)",
+                actionRoute = "colliery_manager"
+            )
+        } else {
+            addAndClockInWorker("Anil Hemram", "EMP-9922", "Heavy Operator", "M/s RK Earthmovers", "Morning (06:00 - 14:00)", method)
+        }
+    }
+
+    fun toggleCheckIn(id: String) {
+        val idx = workerRoster.indexOfFirst { it.id == id }
+        if (idx != -1) {
+            val worker = workerRoster[idx]
+            val newState = !worker.isPresent
+            workerRoster[idx] = worker.copy(
+                isPresent = newState,
+                checkInTime = if (newState) "Just Now" else "Clocked-Out"
+            )
+            if (newState) {
+                StatutoryNotificationManager.addNotification(
+                    title = "Workforce Check-In: ${worker.name}",
+                    message = "${worker.designation} ${worker.name} (${worker.employer}) clocked in.",
+                    category = "SYSTEM",
+                    severity = "INFO",
+                    mineName = "Govindpur Colliery (Mine ID: 42)",
+                    actionRoute = "colliery_manager"
+                )
+            }
+        }
+    }
+
+    fun addAndClockInWorker(
+        name: String,
+        workerId: String,
+        designation: String,
+        employer: String,
+        shift: String,
+        method: String = "MANUAL_ENTRY"
+    ) {
+        val newWorker = WorkerAttendanceItem(
+            id = "w_${System.currentTimeMillis()}",
+            workerId = workerId,
+            name = name,
+            designation = designation,
+            employer = employer,
+            shift = shift,
+            checkInTime = "Just Now",
+            verificationMethod = method,
+            isPresent = true
+        )
+        workerRoster.add(0, newWorker)
+
+        StatutoryNotificationManager.addNotification(
+            title = "Workforce Check-In: $name",
+            message = "$designation $name ($employer) clocked in via $method.",
+            category = "SYSTEM",
+            severity = "INFO",
+            mineName = "Govindpur Colliery (Mine ID: 42)",
+            actionRoute = "colliery_manager"
+        )
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +162,7 @@ fun AttendanceScreen(
     var selectedShift by remember { mutableStateOf("Morning (06:00 - 14:00)") }
     var showClockInDialog by remember { mutableStateOf(false) }
 
-    val workerRoster = remember { mutableStateListOf<WorkerAttendanceItem>().apply { addAll(SAMPLE_WORKERS_ROSTER) } }
+    val workerRoster = WorkforceAttendanceManager.workerRoster
 
     var tempPhotoUri by rememberSaveable { mutableStateOf<String?>(null) }
     var lastCapturedSelfie by remember { mutableStateOf<Bitmap?>(null) }
@@ -101,15 +182,7 @@ fun AttendanceScreen(
                 }
                 lastCapturedSelfie = bitmap
 
-                // Auto clock-in first unverified worker
-                val unverifiedIndex = workerRoster.indexOfFirst { !it.isPresent }
-                if (unverifiedIndex != -1) {
-                    workerRoster[unverifiedIndex] = workerRoster[unverifiedIndex].copy(
-                        isPresent = true,
-                        checkInTime = "Just Now",
-                        verificationMethod = "FACE_BIOMETRIC"
-                    )
-                }
+                WorkforceAttendanceManager.checkInFirstUnverified("FACE_BIOMETRIC")
                 Toast.makeText(context, "✅ Face Biometric Verified & Check-In Recorded!", Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
                 Log.e("AttendanceScreen", "Error decoding selfie: ${e.message}", e)
@@ -162,7 +235,7 @@ fun AttendanceScreen(
                         CoalGuardLogo(size = 32.dp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
-                            Text("COAL INDIA LIMITED", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
+                            Text("COALGUARD PLATFORM", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
                             Text("सत्यमेव जयते | WORKFORCE ATTENDANCE & MUSTER ROLL", fontSize = 8.sp, color = GovtGoldAmber, fontWeight = FontWeight.Bold)
                         }
                     }
@@ -228,9 +301,9 @@ fun AttendanceScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    AttendanceKpiCard("TOTAL ON-SITE", "${workerRoster.count { it.isPresent }} Miners", GovtNavyPrimary, Modifier.weight(1f))
-                    AttendanceKpiCard("CIL REGULAR", "${workerRoster.count { it.isPresent && it.employer.contains("CIL") }} Staff", Color(0xFF059669), Modifier.weight(1f))
-                    AttendanceKpiCard("CONTRACTORS", "${workerRoster.count { it.isPresent && !it.employer.contains("CIL") }} Workers", GovtGoldAmber, Modifier.weight(1f))
+                    AttendanceKpiCard("TOTAL ON-SITE", "${WorkforceAttendanceManager.onSiteCount()} Miners", GovtNavyPrimary, Modifier.weight(1f))
+                    AttendanceKpiCard("CIL REGULAR", "${WorkforceAttendanceManager.cilStaffCount()} Staff", Color(0xFF059669), Modifier.weight(1f))
+                    AttendanceKpiCard("CONTRACTORS", "${WorkforceAttendanceManager.contractorCount()} Workers", GovtGoldAmber, Modifier.weight(1f))
                     AttendanceKpiCard("OFFLINE CACHE", "0 Pending", Color(0xFF0284C7), Modifier.weight(1f))
                 }
             }
@@ -254,6 +327,7 @@ fun AttendanceScreen(
 
                     Button(
                         onClick = {
+                            WorkforceAttendanceManager.checkInFirstUnverified("GEO_FENCED_GATE")
                             Toast.makeText(context, "📍 GNSS Pithead Geofence Verified: Check-In Recorded!", Toast.LENGTH_SHORT).show()
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF059669)),
@@ -452,15 +526,8 @@ fun AttendanceScreen(
 
                             Button(
                                 onClick = {
-                                    val idx = workerRoster.indexOfFirst { it.id == worker.id }
-                                    if (idx != -1) {
-                                        val newState = !workerRoster[idx].isPresent
-                                        workerRoster[idx] = workerRoster[idx].copy(
-                                            isPresent = newState,
-                                            checkInTime = if (newState) "Just Now" else "Clocked-Out"
-                                        )
-                                        Toast.makeText(context, if (newState) "✅ Worker Checked-In!" else "Worker Clocked-Out", Toast.LENGTH_SHORT).show()
-                                    }
+                                    WorkforceAttendanceManager.toggleCheckIn(worker.id)
+                                    Toast.makeText(context, if (!worker.isPresent) "✅ Worker Checked-In!" else "Worker Clocked-Out", Toast.LENGTH_SHORT).show()
                                 },
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = if (worker.isPresent) Color(0xFFDC2626) else GovtNavyPrimary
@@ -532,19 +599,13 @@ fun AttendanceScreen(
                 Button(
                     onClick = {
                         if (newWorkerName.isNotBlank()) {
-                            workerRoster.add(
-                                0,
-                                WorkerAttendanceItem(
-                                    id = System.currentTimeMillis().toString(),
-                                    workerId = newWorkerId,
-                                    name = newWorkerName,
-                                    designation = newDesignation,
-                                    employer = newEmployer,
-                                    shift = selectedShift,
-                                    checkInTime = "Just Now",
-                                    verificationMethod = "MANUAL_ENTRY",
-                                    isPresent = true
-                                )
+                            WorkforceAttendanceManager.addAndClockInWorker(
+                                name = newWorkerName,
+                                workerId = newWorkerId,
+                                designation = newDesignation,
+                                employer = newEmployer,
+                                shift = selectedShift,
+                                method = "MANUAL_ENTRY"
                             )
                             Toast.makeText(context, "✅ Worker $newWorkerName Clocked-In!", Toast.LENGTH_SHORT).show()
                         }

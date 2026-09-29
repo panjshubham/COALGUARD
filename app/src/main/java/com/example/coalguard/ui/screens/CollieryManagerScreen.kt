@@ -56,7 +56,7 @@ fun CollieryManagerScreen(
                 title = {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("COAL INDIA LIMITED", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
+                            Text("COALGUARD PLATFORM", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
                             Spacer(modifier = Modifier.width(6.dp))
                             Surface(color = Color(0xFF065F46), shape = RoundedCornerShape(6.dp)) {
                                 Text("Online", modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), fontSize = 10.sp, color = Color(0xFFA7F3D0), fontWeight = FontWeight.Bold)
@@ -183,7 +183,7 @@ fun CollieryManagerScreen(
                     ) {
                         CollieryKpiCard(
                             title = "WORKERS ON-SITE",
-                            value = "357",
+                            value = "${WorkforceAttendanceManager.onSiteCount()}",
                             sub = "3 Active Shifts",
                             accentColor = Color(0xFF0284C7),
                             icon = Icons.Default.Groups,
@@ -216,7 +216,7 @@ fun CollieryManagerScreen(
 
                         CollieryKpiCard(
                             title = "ACTIVE CONTRACTORS",
-                            value = "2",
+                            value = "${WorkforceAttendanceManager.contractorCount()}",
                             sub = "of 4 registered",
                             accentColor = GovtGoldAmber,
                             icon = Icons.Default.Engineering,
@@ -243,7 +243,7 @@ fun CollieryManagerScreen(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        ShiftItemCard("Morning (06:00 - 14:00)", "Rajesh Kumar", "SHIFT FOREMAN", "142 MINERS", true)
+                        ShiftItemCard("Morning (06:00 - 14:00)", "Rajesh Kumar", "SHIFT FOREMAN", "${WorkforceAttendanceManager.onSiteCount()} MINERS", true)
                         Spacer(modifier = Modifier.height(10.dp))
                         ShiftItemCard("Afternoon (14:00 - 22:00)", "Suresh Patel", "SHIFT FOREMAN", "118 MINERS", false)
                         Spacer(modifier = Modifier.height(10.dp))

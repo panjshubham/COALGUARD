@@ -81,7 +81,7 @@ fun PpeMonitorScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("COAL INDIA LIMITED", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                        Text("COALGUARD PLATFORM", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
                         Text("सत्यमेव जयते | REALTIME YOLOv8 PPE VISION MONITOR", fontSize = 9.sp, color = GovtGoldAmber)
                     }
                 },

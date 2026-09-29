@@ -36,7 +36,7 @@ fun WaterInrushScreen(
                 title = {
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("COAL INDIA LIMITED", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                            Text("COALGUARD PLATFORM", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
                             Spacer(modifier = Modifier.width(8.dp))
                             Surface(color = Color(0xFF065F46), shape = RoundedCornerShape(8.dp)) {
                                 Text("Online", modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), fontSize = 10.sp, color = Color(0xFFA7F3D0), fontWeight = FontWeight.Bold)

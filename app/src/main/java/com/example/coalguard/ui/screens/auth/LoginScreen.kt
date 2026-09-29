@@ -79,7 +79,7 @@ fun LoginScreen(
                 border = BorderStroke(1.dp, GovtGoldAmber)
             ) {
                 Text(
-                    text = "कोल इण्डिया लिमिटेड • COAL INDIA LIMITED",
+                    text = "कोलगाड प्लेटफॉर्म • COALGUARD PLATFORM",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     color = GovtGoldAmber,

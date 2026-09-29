@@ -152,7 +152,7 @@ fun StatutoryRegistersScreen(
                         CoalGuardLogo(size = 32.dp)
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
-                            Text("COAL INDIA LIMITED", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
+                            Text("COALGUARD PLATFORM", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
                             Text("सत्यमेव जयते | CMR STATUTORY REGISTERS & LOGBOOKS", fontSize = 8.sp, color = GovtGoldAmber, fontWeight = FontWeight.Bold)
                         }
                     }

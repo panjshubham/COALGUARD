@@ -81,7 +81,7 @@ fun ViolationsScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("COAL INDIA LIMITED", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                        Text("COALGUARD PLATFORM", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
                         Text("सत्यमेव जयते | STATUTORY DIRECTIVES & HAZARD FEEDS", fontSize = 9.sp, color = GovtGoldAmber)
                     }
                 },

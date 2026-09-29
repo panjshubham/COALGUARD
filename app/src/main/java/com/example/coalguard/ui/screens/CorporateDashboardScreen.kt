@@ -123,7 +123,7 @@ fun CorporateDashboardScreen(
                         Spacer(modifier = Modifier.width(8.dp))
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("COAL INDIA LIMITED", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
+                                Text("COALGUARD PLATFORM", fontWeight = FontWeight.Bold, fontSize = 15.sp, color = Color.White)
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Surface(color = Color(0xFF065F46), shape = RoundedCornerShape(6.dp)) {
                                     Text("HQ ACTIVE", modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), fontSize = 9.sp, color = Color(0xFFA7F3D0), fontWeight = FontWeight.Bold)

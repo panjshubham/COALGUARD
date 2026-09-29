@@ -76,7 +76,7 @@ fun UserManagementScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("COAL INDIA LIMITED", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                        Text("COALGUARD PLATFORM", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
                         Text("सत्यमेव जयते | ENTERPRISE ACCESS CONTROL & USER GOVERNANCE", fontSize = 9.sp, color = GovtGoldAmber)
                     }
                 },

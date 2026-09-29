@@ -187,7 +187,7 @@ fun LandingScreen(
                         CoalGuardLogo(size = 36.dp)
                         Spacer(modifier = Modifier.width(10.dp))
                         Column {
-                            Text("कोल इण्डिया लिमिटेड • CIL · DGMS", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White)
+                            Text("कोलगाड प्लेटफॉर्म • COALGUARD PLATFORM", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = Color.White)
                             Text("सत्यमेव जयते | MINISTRY OF COAL • GOVT. OF INDIA", fontSize = 8.sp, color = GovtGoldAmber, fontWeight = FontWeight.Bold)
                         }
                     }
